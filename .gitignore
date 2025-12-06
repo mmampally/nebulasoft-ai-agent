@@ -1,0 +1,35 @@
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# Environment variables (contains API keys!)
+.env
+
+# Database files
+chroma_db/
+*.db
+
+# Logs
+tickets.log
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files (optional - you might want to keep these)
+test_api.py
+find_model.py

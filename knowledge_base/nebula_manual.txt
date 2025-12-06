@@ -1,0 +1,19 @@
+NebulaSoft User Manual v2.4
+
+ERROR CODES:
+- Error 404: File not found. Check that the file path is correct and the file exists in the system.
+- Error 500: Internal server error. This usually indicates a backend issue. Try restarting the NebulaSoft service.
+- Error 403: Permission denied. Ensure you have the correct access rights to perform this operation.
+- Error 101: Database connection failed. Verify your database credentials in the config file.
+
+INSTALLATION:
+To install NebulaSoft on Windows, download the installer from our website. Run the .exe file and follow the setup wizard. Default installation path is C:\Program Files\NebulaSoft. For Linux, use the command: sudo apt-get install nebulasoft.
+
+FEATURES:
+NebulaSoft includes real-time collaboration tools, cloud sync, automated backups, and AI-powered code suggestions. The Pro plan includes advanced analytics and priority support. Enterprise customers get dedicated account managers and custom integrations.
+
+CONFIGURATION:
+Edit the config.yaml file to customize NebulaSoft. Key settings include: database_url, api_key, max_concurrent_users, and backup_frequency. Restart the service after making changes.
+
+TROUBLESHOOTING:
+If NebulaSoft crashes on startup, check the logs at /var/log/nebulasoft.log. Common issues include missing dependencies, port conflicts, and insufficient permissions. Run the diagnostic tool with: nebulasoft --diagnose
