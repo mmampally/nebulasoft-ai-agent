@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  nebulasoft-agent:
+    build: .
+    container_name: nebulasoft-support-agent
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./tickets.log:/app/tickets.log

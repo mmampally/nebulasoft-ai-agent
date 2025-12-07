@@ -1,0 +1,31 @@
+# Virtual environment
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+
+# Database (will be created in container)
+chroma_db/
+
+# Logs
+tickets.log
+*.log
+
+# Test files
+test_*.py
+find_model.py
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+EOF
