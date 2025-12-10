@@ -1,4 +1,4 @@
-## 🐳 Docker Deployment
+##  Docker Deployment
 
 ### Build the Docker Image
 ```bash
@@ -10,7 +10,7 @@ docker build -t nebulasoft-agent .
 docker run -it --env OPENROUTER_API_KEY=your_key_here nebulasoft-agent
 ```
 
-### Run with Docker Compose (Recommended)
+### Run with Docker Compose
 ```bash
 # Make sure .env file exists with your API key
 echo "OPENROUTER_API_KEY=your_key_here" > .env
