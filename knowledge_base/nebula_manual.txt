@@ -1,19 +1,106 @@
-NebulaSoft User Manual v2.4
+# NebulaSoft User Manual v2.4
 
-ERROR CODES:
-- Error 404: File not found. Check that the file path is correct and the file exists in the system.
-- Error 500: Internal server error. This usually indicates a backend issue. Try restarting the NebulaSoft service.
-- Error 403: Permission denied. Ensure you have the correct access rights to perform this operation.
-- Error 101: Database connection failed. Verify your database credentials in the config file.
+## Introduction
+NebulaSoft is a comprehensive software platform designed for development teams, leveraging React.js for the frontend, Python for the backend, and Docker for containerization. This manual serves as the central knowledge base for installation, usage, configuration, and troubleshooting. It includes details on common errors across our tech stacks, as well as guidance on integrating AI agents using LangChain for enhanced functionality like code suggestions. Always ensure you're using the latest version for optimal performance and security.
 
-INSTALLATION:
-To install NebulaSoft on Windows, download the installer from our website. Run the .exe file and follow the setup wizard. Default installation path is C:\Program Files\NebulaSoft. For Linux, use the command: sudo apt-get install nebulasoft.
+## Error Codes
+This section lists core application error codes along with expanded troubleshooting steps. We've also incorporated common errors from our React.js frontend, Python backend, and Docker deployment to provide a holistic view.
 
-FEATURES:
-NebulaSoft includes real-time collaboration tools, cloud sync, automated backups, and AI-powered code suggestions. The Pro plan includes advanced analytics and priority support. Enterprise customers get dedicated account managers and custom integrations.
+### Application-Specific Errors
+- **Error 404: File not found.** Check that the file path is correct and the file exists in the system. This can occur if assets are misplaced during deployment; verify your build artifacts.
+- **Error 500: Internal server error.** This usually indicates a backend issue, such as unhandled exceptions in Python code. Try restarting the NebulaSoft service. Inspect server logs for stack traces.
+- **Error 403: Permission denied.** Ensure you have the correct access rights to perform this operation. This may relate to file system permissions or API authentication tokens.
+- **Error 101: Database connection failed.** Verify your database credentials in the config file. Test connectivity using Python's database library (e.g., SQLAlchemy) to isolate issues.
 
-CONFIGURATION:
-Edit the config.yaml file to customize NebulaSoft. Key settings include: database_url, api_key, max_concurrent_users, and backup_frequency. Restart the service after making changes.
+### Common React.js Errors
+React.js powers our interactive UI. Here are frequent errors and fixes based on developer experiences:
+- **Cannot read property 'x' of undefined/null:** Often due to accessing properties on undefined objects. Use optional chaining (e.g., `obj?.property`) or add null checks before rendering.
+- **Invalid hook call:** Hooks like `useState` or `useEffect` must be called at the top level of a function component, not inside loops or conditionals. Refactor your code to follow the Rules of Hooks.
+- **Missing 'key' prop in lists:** When rendering arrays (e.g., mapping over data), add a unique `key` prop to each element to help React track changes efficiently.
+- **Component is not a function:** This happens if you import or export components incorrectly. Ensure default exports match imports (e.g., `export default MyComponent` and `import MyComponent from './file'`).
+- **Unexpected token or syntax errors:** Check for mismatched brackets or JSX syntax issues; use tools like ESLint for early detection.
 
-TROUBLESHOOTING:
-If NebulaSoft crashes on startup, check the logs at /var/log/nebulasoft.log. Common issues include missing dependencies, port conflicts, and insufficient permissions. Run the diagnostic tool with: nebulasoft --diagnose
+### Common Python Errors
+Our backend is built with Python, so watch for these runtime issues:
+- **SyntaxError:** Caused by invalid code structure, like missing colons or parentheses. Run your script with `python -m py_compile file.py` to validate.
+- **IndentationError:** Python relies on consistent indentation. Use spaces or tabs uniformly (recommend 4 spaces) and check for mixed usage.
+- **NameError:** Variable or function not defined. Ensure all imports are correct and variables are initialized before use.
+- **TypeError:** Incompatible types, e.g., adding string and int. Use type hints (e.g., `def func(a: int) -> str:`) and check with `mypy`.
+- **ImportError/ModuleNotFoundError:** Missing modules. Verify your virtual environment (e.g., via `venv`) and install dependencies with `pip install -r requirements.txt`.
+- **ValueError:** Invalid argument values, like converting non-numeric strings to int. Add try-except blocks for robust handling.
+
+### Common Docker Errors
+NebulaSoft supports Docker for containerized deployments. Common pitfalls include:
+- **Container exited with code 137:** Out of memory. Increase Docker's resource limits in settings or optimize your app's memory usage.
+- **Port already in use:** Conflict with host ports. Use `docker ps` to check running containers and specify alternative ports in `docker run -p`.
+- **Volume mount errors:** Permissions issues on shared directories. Ensure the host directory exists and use `docker run -v /host/path:/container/path` correctly.
+- **Image build failures:** Syntax errors in Dockerfile. Validate with `docker build --no-cache .` and check for missing dependencies.
+- **Network errors:** Containers can't communicate. Use `docker network create` for custom networks or inspect with `docker network ls`.
+
+## Installation
+NebulaSoft can be installed on various platforms, with Docker recommended for consistency across environments.
+
+### Windows Installation
+Download the installer from our website. Run the `.exe` file and follow the setup wizard. Default path: `C:\Program Files\NebulaSoft`. Post-install, verify by running `nebulasoft --version`.
+
+### Linux Installation
+Use: `sudo apt-get install nebulasoft`. For Debian-based systems; on others, use equivalent package managers like `yum`. Ensure Python 3.8+ and Node.js 16+ are pre-installed.
+
+### Docker Installation
+For containerized setup:
+1. Pull the image: `docker pull nebulasoft/latest`.
+2. Run: `docker run -d -p 8080:80 --name nebulasoft nebulasoft/latest`.
+3. Access via `http://localhost:8080`. Mount volumes for persistent data: `-v /host/config:/app/config`.
+Customize with environment variables, e.g., `-e DATABASE_URL=your_url`.
+
+Install dependencies: Ensure Docker Desktop is running. Common issue: If Docker fails to start, check anti-virus interference or resource allocation.
+
+## Features
+NebulaSoft offers robust tools for modern development:
+
+- **Real-time Collaboration:** Edit code simultaneously with team members via WebSockets.
+- **Cloud Sync:** Automatic synchronization with cloud providers like AWS S3.
+- **Automated Backups:** Scheduled data exports to prevent loss.
+- **AI-Powered Code Suggestions:** Integrated with LangChain for intelligent completions in React.js and Python code.
+- **Pro Plan:** Advanced analytics dashboard and priority email support.
+- **Enterprise Plan:** Dedicated account managers, custom integrations (e.g., with CI/CD pipelines), and SLA guarantees.
+
+## AI Agents and LangChain Integration
+NebulaSoft utilizes LangChain for building AI agents that enhance productivity, such as code suggestion agents. LangChain is a Python framework for creating applications with large language models (LLMs).
+
+### Getting Started with LangChain
+1. Install: `pip install langchain`.
+2. Basic Agent Setup: Import and create an agent with tools.
+   ```python
+   from langchain.agents import initialize_agent, Tool
+   from langchain.llms import OpenAI  # Or your preferred LLM
+
+   llm = OpenAI(temperature=0)
+   tools = [Tool(name="Calculator", func=lambda x: eval(x), description="Useful for math")]
+   agent = initialize_agent(tools, llm, agent_type="zero-shot-react-description")
+   result = agent.run("What is 2 + 2?")
+   ```
+3. Integration in NebulaSoft: Configure in `config.yaml` under `ai_settings: langchain_model: 'gpt-4'`. Use for custom agents that query databases or generate code.
+4. Common Use Cases: Build agents for debugging Python errors or suggesting React components. Refer to LangChain docs for advanced workflows like multi-tool agents.
+
+Troubleshooting: If agents fail, check API keys and LLM quotas. Handle exceptions with try-except for resilience.
+
+## Configuration
+Edit `config.yaml` to customize. Key settings:
+- `database_url`: Connection string (e.g., `postgresql://user:pass@localhost/db`).
+- `api_key`: For external services like LLMs.
+- `max_concurrent_users`: Limit for collaboration (default: 50).
+- `backup_frequency`: In hours (default: 24).
+- New: `docker_settings`: Port mappings and volume paths for containerized runs.
+- AI-Specific: `langchain_tools`: List of enabled tools (e.g., ["search", "calculator"]).
+
+Restart with `nebulasoft restart` after changes. Use YAML validators to avoid syntax errors.
+
+## Troubleshooting
+If issues arise:
+- **Crashes on Startup:** Check `/var/log/nebulasoft.log` (Linux) or `C:\Program Files\NebulaSoft\logs` (Windows). Look for dependency errors.
+- **Common Issues:** Missing dependencies—run `pip install -r requirements.txt` for Python, `npm install` for React. Port conflicts: Use `netstat` or `lsof -i :port` to identify and kill processes. Insufficient permissions: Run as admin or adjust chown.
+- **Diagnostic Tool:** Execute `nebulasoft --diagnose` for automated checks on stacks, including React build integrity, Python env, and Docker status.
+- **AI-Related:** If code suggestions fail, verify LangChain integration and LLM connectivity. Debug with verbose logging in config.
+
+For unresolved issues, contact support with logs and system details.

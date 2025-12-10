@@ -11,10 +11,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
-COPY ingest.py .
-COPY tools.py .
-COPY agent.py .
-COPY knowledge_base/ ./knowledge_base/
+COPY . .
 
 # Create directories for runtime data
 RUN mkdir -p chroma_db
@@ -24,6 +21,9 @@ RUN python ingest.py
 
 # Set environment variable for Python buffering
 ENV PYTHONUNBUFFERED=1
+EXPOSE 8501
 
 # Run the agent
-CMD ["python", "agent.py"]
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--browser.serverAddress=localhost"]
+
+#bash script, create file .sh 

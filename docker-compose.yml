@@ -9,3 +9,6 @@ services:
     tty: true
     volumes:
       - ./tickets.log:/app/tickets.log
+    ports:
+      - "8501:8501"
+

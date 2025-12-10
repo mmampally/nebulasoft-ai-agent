@@ -2,54 +2,68 @@ import os
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_core.documents import Document
+
+
+# ✅ CENTRALIZED CONFIG
+NEBULA_DOC_PATH = "knowledge_base/nebula_manual.txt"
+PERSIST_DIR = "./chroma_nebula"   # Renamed for clarity
+
 
 def main():
-    # Loading text
-    doc_path = "knowledge_base/nebula_manual.txt"
+    # ✅ 1. Load NebulaSoft Manual
+    if not os.path.exists(NEBULA_DOC_PATH):
+        raise FileNotFoundError(f"❌ Document not found: {NEBULA_DOC_PATH}")
     
-    if not os.path.exists(doc_path):
-        raise FileNotFoundError(f"Document not found: {doc_path}")
-    
-    with open(doc_path, "r", encoding="utf-8") as f:
+    with open(NEBULA_DOC_PATH, "r", encoding="utf-8") as f:
         raw_text = f.read()
     
-    print(f"Loaded document: {len(raw_text)} characters")
+    print(f"✅ Loaded NebulaSoft manual: {len(raw_text)} characters")
     
-    # Splitting into chunks
+    # ✅ 2. Split into chunks
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=500,
         chunk_overlap=100
     )
     chunks = splitter.split_text(raw_text)
-    print(f"Created {len(chunks)} chunks")
+    print(f"✅ Created {len(chunks)} chunks")
     
-    # Create documents with metadata (for citation)
-    from langchain_core.documents import Document
+    # ✅ 3. Create documents with proper metadata (for citation later)
     documents = [
         Document(
             page_content=chunk,
-            metadata={"source": "nebula_manual.txt", "chunk_id": i}
+            metadata={
+                "source": "nebula_manual.txt",
+                "chunk_id": i,
+                "kb": "nebula"
+            }
         )
         for i, chunk in enumerate(chunks)
     ]
     
-    # Loading embeddings model (LangChain-compatible wrapper)
+    # ✅ 4. Load Embeddings Model
     embeddings = HuggingFaceEmbeddings(
-        model_name='sentence-transformers/all-MiniLM-L6-v2',
-        model_kwargs={'device': 'cpu'},
-        encode_kwargs={'normalize_embeddings': True}
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+        model_kwargs={"device": "cpu"},
+        encode_kwargs={"normalize_embeddings": True}
     )
     
-    # Building Chroma vector DB (easier than FAISS for this use case)
-    db_path = "./chroma_db"
+    # ✅ 5. Reset + Rebuild Vector DB (Safe Local Behavior)
+    if os.path.exists(PERSIST_DIR):
+        print(f"⚠️ Existing vector DB found at {PERSIST_DIR}. Rebuilding it...")
+    
     db = Chroma.from_documents(
         documents=documents,
         embedding=embeddings,
-        persist_directory=db_path
+        persist_directory=PERSIST_DIR,
+        collection_name="nebula_kb"
     )
     
-    print(f"✅ Vector DB saved to {db_path}")
-    print(f"✅ Total chunks indexed: {len(chunks)}")
+    db.persist()
+    
+    print(f"✅ NebulaSoft vector DB saved to: {PERSIST_DIR}")
+    print(f"✅ Total NebulaSoft chunks indexed: {len(chunks)}")
+
 
 if __name__ == "__main__":
     main()

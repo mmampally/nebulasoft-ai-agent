@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#4F46E5"        # Buttons & highlights
+backgroundColor = "#0F172A"     # Page background
+secondaryBackgroundColor = "#1E293B"
+textColor = "#E5E7EB"
+font = "sans serif"
