@@ -38,11 +38,70 @@ except Exception as e:
 TEMP_USER_DB: Optional[Chroma] = None
 
 
-def ingest_user_document(text: str, source_name: str = "uploaded_document.txt"):
+def load_text_from_file(file_path: str) -> str:
     """
-    Add a user-uploaded document to a temporary in-memory vector store.
-    This lives only for the current process/session and is NOT persisted.
+    Load and return text from a variety of file types.
+    Supports: .txt, .md, .json, .csv, .log, .py, .html, .xml
+    Optionally supports: .pdf, .docx
     """
+
+    ext = os.path.splitext(file_path)[1].lower()
+
+    # ---- Plain Text Formats ----
+    if ext in [".txt", ".md", ".log", ".py", ".html", ".xml"]:
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            return f.read()
+
+    # ---- JSON ----
+    if ext == ".json":
+        import json
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return json.dumps(data, indent=2)
+
+    
+
+    # ---- PDF 
+    if ext == ".pdf":
+        try:
+            import PyPDF2
+            with open(file_path, "rb") as f:
+                reader = PyPDF2.PdfReader(f)
+                text = ""
+                for page in reader.pages:
+                    text += page.extract_text() + "\n"
+                return text
+        except Exception:
+            return "Error: PDF extraction library missing (install PyPDF2)."
+
+    # ---- DOCX 
+    if ext == ".docx":
+        try:
+            import docx
+            document = docx.Document(file_path)
+            return "\n".join([para.text for para in document.paragraphs])
+        except Exception:
+            return "Error: python-docx library missing."
+
+    return f"Unsupported file type: {ext}"
+
+def ingest_user_document(input_data: str, source_name: str = None):
+    """
+    Ingest either:
+    - raw text string
+    - or a file path to a supported text-based document
+    """
+
+    # Detect if this is a file path
+    if os.path.exists(input_data):
+        file_path = input_data
+        text = load_text_from_file(file_path)
+        source_name = source_name or os.path.basename(file_path)
+    else:
+        # Treat as raw text
+        text = input_data
+        source_name = source_name or "user_provided_text.txt"
+
     global TEMP_USER_DB
 
     doc = Document(
@@ -54,13 +113,9 @@ def ingest_user_document(text: str, source_name: str = "uploaded_document.txt"):
     )
 
     if TEMP_USER_DB is None:
-        TEMP_USER_DB = Chroma.from_documents(
-            [doc],
-            EMBEDDINGS,
-        )
+        TEMP_USER_DB = Chroma.from_documents([doc], EMBEDDINGS)
     else:
         TEMP_USER_DB.add_documents([doc])
-
 
 # ============================================================
 # Tool 1: DocSearchTool - Searches the Vector Database
@@ -247,6 +302,46 @@ class TicketEscalationTool(BaseTool):
         """Async version (not implemented for this project)."""
         raise NotImplementedError("Async not supported for this tool")
 
+class TicketLookupInput(BaseModel):
+    ticket_id: str = Field(description="The ticket ID to look up.")
+    
+
+
+class TicketLookupTool(BaseTool):
+    name: str = "lookup_ticket"
+    description: str = (
+        "Looks up a support ticket by ticket ID and returns its details. "
+        "Use this when the user asks about the status of an existing ticket."
+    )
+    args_schema: Type[BaseModel] = TicketLookupInput
+
+    def _run(self, ticket_id: str) -> str:
+
+        if not os.path.exists("tickets.log"):
+            return "No tickets found in the system."
+
+        try:
+            with open("tickets.log", "r", encoding="utf-8") as f:
+                for line in f:
+                    if not line.strip():
+                        continue
+                    ticket = json.loads(line)
+                    if ticket.get("ticket_id") == ticket_id:
+                        return (
+                            "🎫 Ticket Details:\n"
+                            f"Ticket ID: {ticket.get('ticket_id')}\n"
+                            f"Created At: {ticket.get('timestamp')}\n"
+                            f"Severity: {ticket.get('severity')}\n"
+                            f"Status: {ticket.get('status')}\n"
+                            f"Summary: {ticket.get('summary')}"
+                        )
+            return f"No ticket found with ID {ticket_id}."
+
+        except Exception as e:
+            return f"Error reading ticket log: {str(e)}"
+
+    async def _arun(self, ticket_id: str) -> str:
+        raise NotImplementedError("Async not supported for this tool.")
 
 # ============================================================
 # Convenience function to get all tools
@@ -258,4 +353,5 @@ def get_all_tools():
         DocSearchTool(),
         PricingCalculatorTool(),
         TicketEscalationTool(),
+        TicketLookupTool(),
     ]

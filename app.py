@@ -122,7 +122,7 @@ st.markdown("""
 
 uploaded_file = st.file_uploader(
     "hidden-upload",
-    type=["txt"],
+    type=["txt", "md", "json", "csv", "log", "py", "html", "xml", "pdf", "docx"],
     label_visibility="collapsed",
 )
 
