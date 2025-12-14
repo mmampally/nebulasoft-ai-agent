@@ -25,7 +25,7 @@ st.set_page_config(
 
 st.title("NebulaSoft AI Support Agent")
 st.caption(
-    "You're chatting with **Mynko**, Tier-1 Technical Support of NebulaSoft Inc."
+    "You're chatting with **Mynko**, Tier-1 Technical Support at NebulaSoft Inc. I can answer technical queries, provide installation solutions and much more, just ask away!"
 )
 
 # -----------------------------
@@ -46,6 +46,7 @@ STRICT RULES YOU MUST FOLLOW:
 4. Only escalate tickets if documentation cannot answer the question
 5. Use calculate_pricing for any pricing questions
 6. Never hallucinate features, errors, or fixes
+
 
 WORKFLOW:
 - Technical → search_documentation
@@ -85,40 +86,6 @@ if "tools" not in st.session_state:
 if "uploaded_sources" not in st.session_state:
     st.session_state.uploaded_sources = []
 
-# -----------------------------
-# -----------------------------
-# TRUE HIDDEN UPLOAD (FLOATING ICON)
-# -----------------------------
-
-st.markdown("""
-<style>
-.upload-container {
-    position: fixed;
-    bottom: 90px;
-    right: 30px;
-    z-index: 9999;
-}
-.upload-container input[type="file"] {
-    display: none;
-}
-.upload-label {
-    background: #2563EB;
-    color: white;
-    padding: 10px 14px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 20px;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
-}
-.upload-label:hover {
-    background: #1D4ED8;
-}
-</style>
-
-<div class="upload-container">
-    <label for="hidden-upload" class="upload-label">📎</label>
-</div>
-""", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader(
     "hidden-upload",
@@ -126,12 +93,22 @@ uploaded_file = st.file_uploader(
     label_visibility="collapsed",
 )
 
+import tempfile
+
 if uploaded_file:
     if uploaded_file.name not in st.session_state.uploaded_sources:
-        text = uploaded_file.read().decode("utf-8")
-        ingest_user_document(text, source_name=uploaded_file.name)
+
+        # Create temporary file with correct extension
+        suffix = "." + uploaded_file.name.split(".")[-1]
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            tmp.write(uploaded_file.read())
+            temp_path = tmp.name
+
+        # Ingest the document using file path
+        ingest_user_document(temp_path, source_name=uploaded_file.name)
+
         st.session_state.uploaded_sources.append(uploaded_file.name)
-        st.toast("✅ Document added for this session")
+        st.toast(f"📄 {uploaded_file.name} added for this session!")
 
 # -----------------------------
 # AGENT LOOP WITH TOOLS
